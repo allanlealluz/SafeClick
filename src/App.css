@@ -1,38 +1,44 @@
-.App {
+/* Limpando as margens padrão do navegador */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #F5F7FA;
+}
+
+/* Hero Section (A área principal azul) */
+.hero-section {
+  background-color: #092C4C;
+  color: white;
+  padding: 6rem 1rem;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Banners de Resultado */
+.banner-resultado {
+  color: white;
+  padding: 2rem 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.banner-safe {
+  background-color: #27AE60;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.banner-warning {
+  background-color: #F39C12;
+}
+
+.banner-danger {
+  background-color: #C0392B;
+}
+.search-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 10px;
+  margin-top: 2rem;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+@media (min-width: 600px) {
+  .search-container {
+    flex-direction: row;
   }
 }

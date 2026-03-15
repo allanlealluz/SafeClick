@@ -7,33 +7,15 @@ import {
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
-    primary: {
-      main: '#092C4C',
-      light: '#1A5276',
-    },
-    secondary: {
-      main: '#2980B9',
-    },
-    background: {
-      default: '#F5F7FA', 
-      paper: '#FFFFFF',
-    },
-    text: {
-      primary: '#1A1A1A',
-      secondary: '#555555',
-    },
+    primary: { main: '#092C4C' },
+    secondary: { main: '#2980B9' },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h3: { fontWeight: 800, letterSpacing: '-1px' },
-    h5: { fontWeight: 700 },
-    h6: { fontWeight: 600 },
     button: { textTransform: 'none', fontWeight: 600 }, 
   },
-  shape: {
-    borderRadius: 8, 
-  },
+  shape: { borderRadius: 8 },
 });
 
 export default function App() {
@@ -41,48 +23,64 @@ export default function App() {
   const [analiseStatus, setAnaliseStatus] = useState(null); 
   const [mensagem, setMensagem] = useState(""); 
 
-  const handleAnalisar = () => {
+  const handleAnalisar = async () => {
     if (!link) return;
     
     setAnaliseStatus("loading");
     setMensagem(""); 
 
-    setTimeout(() => {
-      const url = link.toLowerCase().trim();
-      let status = "safe";
-      let msg = "Boas notícias! Nenhum risco aparente foi encontrado na estrutura deste link.";
+    const urlBase = link.toLowerCase().trim();
 
-      const regexIP = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
-      
-      if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        status = "warning";
-        msg = "Atenção: O link não possui 'http://' ou 'https://'.";
-      } else if (url.startsWith("http://")) {
-        status = "warning";
-        msg = "Cuidado: O site não possui certificado de segurança (HTTPS).";
-      } else if (regexIP.test(url)) {
-        status = "danger";
-        msg = "Muito Suspeito: O link usa um endereço IP direto. Tática comum em phishing.";
-      } else if (url.includes("bit.ly") || url.includes("tinyurl") || url.includes("cutt.ly")) {
-        status = "warning";
-        msg = "Atenção: Este é um link encurtado. Ele esconde o destino final.";
-      } else if (url.includes("gratis") || url.includes("promocao") || url.includes("premio")) {
-        status = "danger";
-        msg = "Alerta: O link contém palavras comumente usadas em golpes!";
+    // 1. ANÁLISE HEURÍSTICA (Rápida e local)
+    const regexIP = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
+    if (!urlBase.startsWith("http://") && !urlBase.startsWith("https://")) {
+      setAnaliseStatus("warning");
+      setMensagem("Atenção: O link não possui 'http://' ou 'https://'. Digite a URL completa.");
+      return; 
+    } else if (regexIP.test(urlBase)) {
+      setAnaliseStatus("danger");
+      setMensagem("Muito Suspeito: O link usa um endereço IP direto. Tática comum em phishing.");
+      return;
+    }
+
+    // 2. ANÁLISE PROFUNDA (Via o SEU Backend Seguro)
+    try {
+      // Aqui chamamos o NOSSO servidor (Node.js), e não o Google diretamente!
+      const resposta = await fetch('http://localhost:5000/api/analisar-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urlParaAnalisar: urlBase })
+      });
+
+      const dados = await resposta.json();
+
+      // Se a API retornar a propriedade 'matches', significa que o Google achou ameaça
+      if (dados.matches && dados.matches.length > 0) {
+        setAnaliseStatus("danger");
+        setMensagem("ALERTA MÁXIMO: O Google Safe Browsing detectou que este site é perigoso (Phishing ou Malware)!");
+      } else {
+        // Se não achou no Google, conferimos coisas básicas (como o HTTPS)
+        if (urlBase.startsWith("http://")) {
+          setAnaliseStatus("warning");
+          setMensagem("O Google não detectou malwares, mas cuidado: O site não possui certificado de segurança (HTTPS). Não digite senhas.");
+        } else {
+          setAnaliseStatus("safe");
+          setMensagem("Parece Seguro! O Google Safe Browsing não encontrou registros maliciosos para este link.");
+        }
       }
 
-      setAnaliseStatus(status);
-      setMensagem(msg);
-    }, 1500);
+    } catch (error) {
+      console.error("Erro na API:", error);
+      setAnaliseStatus("warning");
+      setMensagem("Não conseguimos conectar ao nosso servidor de segurança. Verifique se o backend está rodando na porta 5000.");
+    }
   };
 
   return (
     <ThemeProvider theme={theme}>
-      {/* CssBaseline aplica as cores de fundo do tema na página inteira */}
       <CssBaseline /> 
       <div>
-        
-        {/* === HEADER (Topo) === */}
+        {/* === HEADER === */}
         <AppBar position="static" color="primary" elevation={0} sx={{ py: 1 }}>
           <Toolbar>
             <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 800 }}>
@@ -90,38 +88,27 @@ export default function App() {
             </Typography>
             <Button color="inherit">Painel</Button>
             <Button color="inherit">Educação</Button>
-            <Button color="inherit">Configurações</Button>
           </Toolbar>
         </AppBar>
 
-        {/* === HERO SECTION (Inspirado no Have I Been Pwned) === */}
-        <Box sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'white', 
-          py: { xs: 8, md: 12 }, 
-          textAlign: 'center' 
-        }}>
+        {/* === HERO SECTION (Usando classes do App.css) === */}
+        <div className="hero-section">
           <Container maxWidth="md">
             <Typography variant="h3" gutterBottom>
               Verifique se o seu link é seguro
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 400, mb: 4, opacity: 0.9 }}>
-              Analise URLs suspeitas para detectar phishing, malware e golpes de engenharia social.
+              Analise URLs em bancos de dados globais para detectar phishing e malware.
             </Typography>
 
-            {/* Barra de Pesquisa Grande */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+            <div className="search-container">
               <TextField 
                 fullWidth
                 variant="outlined"
                 placeholder="https://exemplo.com"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                sx={{ 
-                  bgcolor: 'white', 
-                  borderRadius: 1,
-                  input: { fontSize: '1.2rem', py: 2 } 
-                }}
+                sx={{ bgcolor: 'white', borderRadius: 1 }}
               />
               <Button 
                 variant="contained" 
@@ -133,74 +120,57 @@ export default function App() {
               >
                 {analiseStatus === "loading" ? "Analisando..." : "Analisar"}
               </Button>
-            </Box>
+            </div>
           </Container>
-        </Box>
+        </div>
 
-        {/* === RESULTADO DA ANÁLISE (Banners Grandes) === */}
+        {/* === RESULTADO DA ANÁLISE === */}
         {analiseStatus && analiseStatus !== "loading" && (
-          <Box sx={{ 
-            bgcolor: analiseStatus === 'safe' ? '#27AE60' : analiseStatus === 'warning' ? '#F39C12' : '#C0392B', 
-            color: 'white', 
-            py: 4 
-          }}>
+          <div className={`banner-resultado ${
+            analiseStatus === 'safe' ? 'banner-safe' : 
+            analiseStatus === 'warning' ? 'banner-warning' : 'banner-danger'
+          }`}>
             <Container maxWidth="md" sx={{ textAlign: 'center' }}>
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 800 }}>
-                {analiseStatus === 'safe' ? "Parece Seguro!" : analiseStatus === 'warning' ? "Atenção Necessária" : "Cuidado! Risco Detectado"}
+                {analiseStatus === 'safe' ? "Parece Seguro!" : 
+                 analiseStatus === 'warning' ? "Atenção Necessária" : "Cuidado! Risco Detectado"}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 400 }}>
                 {mensagem}
               </Typography>
             </Container>
-          </Box>
+          </div>
         )}
 
-        {/* === CONTEÚDO PRINCIPAL (Cards de Informação) === */}
+        {/* === CONTEÚDO PRINCIPAL === */}
         <Container maxWidth="lg" sx={{ mt: 6, mb: 8 }}>
           <Grid container spacing={4}>
-            
-            {/* Educação */}
             <Grid item xs={12} md={6}>
               <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ p: 4 }}>
                   <Typography variant="h5" gutterBottom color="primary">
                     Dica de Segurança
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph sx={{ fontSize: '1.1rem' }}>
-                    Antes de clicar em qualquer link recebido por SMS, WhatsApp ou e-mail, verifique se o endereço começa com "https" e se o domínio corresponde ao site oficial da empresa.
+                  <Typography variant="body1" color="text.secondary" paragraph>
+                    Mesmo que um link conste como seguro, use o bom senso. Golpes muito recentes podem ainda não estar nos bancos de dados do Google.
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
-                    Desconfie sempre do senso de urgência ("Sua conta será bloqueada hoje!").
-                  </Typography>
-                  <Button variant="outlined" sx={{ mt: 3 }} size="large">
-                    Aprender Mais
-                  </Button>
                 </CardContent>
               </Card>
             </Grid>
-
-            {/* Alertas Recentes */}
             <Grid item xs={12} md={6}>
               <Card sx={{ height: '100%' }}>
                 <CardContent sx={{ p: 4 }}>
                   <Typography variant="h5" gutterBottom color="primary">
-                    Alertas Globais Recentes
+                    Como funciona?
                   </Typography>
-                  <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Alert severity="error" variant="filled" sx={{ borderRadius: 2 }}>
-                      Nova onda de phishing se passando pelos Correios (Taxação).
-                    </Alert>
-                    <Alert severity="warning" variant="filled" sx={{ borderRadius: 2 }}>
-                      Golpe do "IPVA com desconto" em alta neste mês.
-                    </Alert>
-                  </Box>
+                  <Typography variant="body1" color="text.secondary">
+                    O SafeClick cruza o link que você digitou com a base de dados em tempo real da <strong>Google Safe Browsing API</strong> para garantir que você não acesse sites listados como maliciosos.
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
-
           </Grid>
         </Container>
-
       </div>
     </ThemeProvider>
   );
