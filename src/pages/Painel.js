@@ -6,7 +6,7 @@ export default function Painel() {
   const [analiseStatus, setAnaliseStatus] = useState(null); 
   const [mensagem, setMensagem] = useState(""); 
 
-  const handleAnalisar = async () => {
+ const handleAnalisar = async () => {
     if (!link) return;
     setAnaliseStatus("loading");
     setMensagem(""); 
@@ -32,31 +32,22 @@ export default function Painel() {
 
       const dados = await resposta.json();
       
-      if (!resposta.ok || dados.error || dados.erro) {
+      if (!resposta.ok || dados.erro) {
         setAnaliseStatus("warning");
-        setMensagem(`Erro na verificação: ${dados.erro || "Falha ao consultar o Google."}`);
+        setMensagem(`Erro na verificação: ${dados.erro || "Falha de conexão."}`);
         return;
       }
 
-      if (dados.matches && dados.matches.length > 0) {
-        setAnaliseStatus("danger");
-        setMensagem("ALERTA MÁXIMO: O Google Safe Browsing detectou que este site é perigoso (Phishing ou Malware)!");
-      } else {
-        if (urlBase.startsWith("http://")) {
-          setAnaliseStatus("warning");
-          setMensagem("O Google não detectou malwares, mas cuidado: O site não possui certificado de segurança (HTTPS). Não digite senhas.");
-        } else {
-          setAnaliseStatus("safe");
-          setMensagem("Parece Seguro! O Google Safe Browsing não encontrou registros maliciosos para este link.");
-        }
-      }
+      // O Backend já manda tudo prontinho agora!
+      setAnaliseStatus(dados.statusFinal);
+      setMensagem(dados.mensagem);
+
     } catch (error) {
       console.error("Erro na API:", error);
       setAnaliseStatus("warning");
-      setMensagem("Não conseguimos conectar ao nosso servidor de segurança. Verifique se o backend está rodando na porta 5000.");
+      setMensagem("Não conseguimos conectar ao nosso servidor de segurança. Verifique se o backend está rodando.");
     }
   };
-
   return (
     <div>
       {/* HERO SECTION */}
