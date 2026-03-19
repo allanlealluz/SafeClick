@@ -43,9 +43,7 @@ export default function App() {
       return;
     }
 
-    // 2. ANÁLISE PROFUNDA (Via o SEU Backend Seguro)
     try {
-      // Aqui chamamos o NOSSO servidor (Node.js), e não o Google diretamente!
       const resposta = await fetch('http://localhost:5000/api/analisar-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,13 +51,12 @@ export default function App() {
       });
 
       const dados = await resposta.json();
-
-      // Se a API retornar a propriedade 'matches', significa que o Google achou ameaça
+      
       if (dados.matches && dados.matches.length > 0) {
         setAnaliseStatus("danger");
         setMensagem("ALERTA MÁXIMO: O Google Safe Browsing detectou que este site é perigoso (Phishing ou Malware)!");
       } else {
-        // Se não achou no Google, conferimos coisas básicas (como o HTTPS)
+
         if (urlBase.startsWith("http://")) {
           setAnaliseStatus("warning");
           setMensagem("O Google não detectou malwares, mas cuidado: O site não possui certificado de segurança (HTTPS). Não digite senhas.");
