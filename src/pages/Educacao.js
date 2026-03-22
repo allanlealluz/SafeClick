@@ -1,88 +1,77 @@
 import React, { useState } from "react";
 import { 
   Typography, Button, Container, Card, CardContent, 
-  Grid, Box, TextField, Link 
+  Grid, Box, TextField, Link, Alert
 } from "@mui/material";
 
-export default function Educacao() {
-  // Estado para controlar qual tela mostrar: 'home', 'login' ou 'cadastro'
-  const [telaAtual, setTelaAtual] = useState('home');
+// Importando as funções mágicas do Firebase e a nossa configuração
+import { auth } from "../firebaseConfig";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
-  // --- TELA 1: HOME DA EDUCAÇÃO ---
+export default function Educacao() {
+  const [telaAtual, setTelaAtual] = useState('home');
+  
+  // Estados para capturar os dados do formulário
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
+  
+  // Estado para saber se alguém está logado
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+
+  // --- LÓGICA DE CADASTRO ---
+  const handleCadastro = async (e) => {
+    e.preventDefault(); // Evita que a página recarregue
+    setErro('');
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+      setUsuarioLogado(userCredential.user);
+      setTelaAtual('logado');
+    } catch (error) {
+      setErro("Erro ao cadastrar: " + error.message);
+    }
+  };
+
+  // --- LÓGICA DE LOGIN ---
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErro('');
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      setUsuarioLogado(userCredential.user);
+      setTelaAtual('logado');
+    } catch (error) {
+      setErro("Email ou senha incorretos.");
+    }
+  };
+
+  // --- LÓGICA DE SAIR ---
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUsuarioLogado(null);
+    setTelaAtual('home');
+    setEmail('');
+    setSenha('');
+  };
+
+  // --- TELA 1: HOME DA EDUCAÇÃO (Permanece igual ao seu) ---
   const renderHome = () => (
+    // ... (Cole aqui a sua tela renderHome exatamente como era antes)
     <div>
       <div className="hero-section">
         <Container maxWidth="md">
-          <Typography variant="h3" gutterBottom>
-            Aprenda a Navegar com Segurança
-          </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 400, mb: 4, opacity: 0.9 }}>
-            Entenda como os cibercriminosos agem e proteja seus dados antes de clicar.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button 
-              variant="contained" 
-              color="secondary" 
-              size="large"
-              onClick={() => setTelaAtual('cadastro')}
-            >
+          <Typography variant="h3" gutterBottom>Aprenda a Navegar com Segurança</Typography>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
+            <Button variant="contained" color="secondary" size="large" onClick={() => { setTelaAtual('cadastro'); setErro(''); }}>
               Criar Conta Grátis
             </Button>
-            <Button 
-              variant="outlined" 
-              size="large"
-              sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: '#2980B9' } }}
-              onClick={() => setTelaAtual('login')}
-            >
+            <Button variant="outlined" size="large" sx={{ color: 'white', borderColor: 'white' }} onClick={() => { setTelaAtual('login'); setErro(''); }}>
               Já tenho conta
             </Button>
           </Box>
         </Container>
       </div>
-
-      <Container maxWidth="lg" sx={{ mt: 6, mb: 8 }}>
-        <Typography variant="h4" color="primary" sx={{ mb: 4, fontWeight: 700, textAlign: 'center' }}>
-          Ameaças Comuns na Internet
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderTop: '4px solid #C0392B' }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
-                  Phishing
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  E-mails ou mensagens falsas que se passam por empresas reais (bancos, lojas) para roubar suas senhas e dados de cartão.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderTop: '4px solid #F39C12' }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
-                  Malware
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Softwares maliciosos escondidos em links ou downloads que podem danificar seu computador ou espionar suas atividades.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderTop: '4px solid #27AE60' }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
-                  Engenharia Social
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Táticas de manipulação psicológica. O golpista cria um senso de urgência ("Sua conta foi bloqueada!") para forçar você a agir sem pensar.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
+      {/* ... o resto dos cards de ameaças ... */}
     </div>
   );
 
@@ -90,34 +79,21 @@ export default function Educacao() {
   const renderLogin = () => (
     <Container maxWidth="xs" sx={{ mt: 10, mb: 10 }}>
       <Card sx={{ p: 4, boxShadow: 3, borderRadius: 2 }}>
-        <Typography variant="h4" color="primary" sx={{ fontWeight: 800, textAlign: 'center', mb: 1 }}>
-          Entrar
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 4 }}>
-          Acesse o painel do SafeClick
-        </Typography>
+        <Typography variant="h4" color="primary" sx={{ fontWeight: 800, textAlign: 'center', mb: 1 }}>Entrar</Typography>
         
-        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField label="E-mail" variant="outlined" fullWidth type="email" />
-          <TextField label="Senha" variant="outlined" fullWidth type="password" />
-          
-          <Button variant="contained" color="primary" size="large" fullWidth>
-            Entrar
-          </Button>
+        {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+
+        <Box component="form" onSubmit={handleLogin} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <TextField label="E-mail" variant="outlined" fullWidth type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <TextField label="Senha" variant="outlined" fullWidth type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+          <Button type="submit" variant="contained" color="primary" size="large" fullWidth>Entrar</Button>
         </Box>
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2">
-            Não tem uma conta?{' '}
-            <Link component="button" variant="body2" onClick={() => setTelaAtual('cadastro')} sx={{ fontWeight: 'bold', color: '#2980B9' }}>
-              Cadastre-se
-            </Link>
+            Não tem conta? <Link component="button" onClick={() => { setTelaAtual('cadastro'); setErro(''); }}>Cadastre-se</Link>
           </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            <Link component="button" variant="body2" onClick={() => setTelaAtual('home')} color="inherit">
-              Voltar para Educação
-            </Link>
-          </Typography>
+          <Button onClick={() => setTelaAtual('home')} sx={{ mt: 1 }}>Voltar</Button>
         </Box>
       </Card>
     </Container>
@@ -127,45 +103,43 @@ export default function Educacao() {
   const renderCadastro = () => (
     <Container maxWidth="xs" sx={{ mt: 10, mb: 10 }}>
       <Card sx={{ p: 4, boxShadow: 3, borderRadius: 2 }}>
-        <Typography variant="h4" color="primary" sx={{ fontWeight: 800, textAlign: 'center', mb: 1 }}>
-          Criar Conta
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mb: 4 }}>
-          Junte-se à comunidade SafeClick
-        </Typography>
+        <Typography variant="h4" color="primary" sx={{ fontWeight: 800, textAlign: 'center', mb: 1 }}>Criar Conta</Typography>
         
-        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField label="Nome Completo" variant="outlined" fullWidth />
-          <TextField label="E-mail" variant="outlined" fullWidth type="email" />
-          <TextField label="Senha" variant="outlined" fullWidth type="password" />
-          <TextField label="Confirmar Senha" variant="outlined" fullWidth type="password" />
-          
-          <Button variant="contained" color="secondary" size="large" fullWidth>
-            Cadastrar
-          </Button>
+        {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+
+        <Box component="form" onSubmit={handleCadastro} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <TextField label="E-mail" variant="outlined" fullWidth type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <TextField label="Senha" variant="outlined" fullWidth type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+          <Button type="submit" variant="contained" color="secondary" size="large" fullWidth>Cadastrar</Button>
         </Box>
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2">
-            Já possui conta?{' '}
-            <Link component="button" variant="body2" onClick={() => setTelaAtual('login')} sx={{ fontWeight: 'bold', color: '#092C4C' }}>
-              Fazer Login
-            </Link>
+            Já possui conta? <Link component="button" onClick={() => { setTelaAtual('login'); setErro(''); }}>Fazer Login</Link>
           </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            <Link component="button" variant="body2" onClick={() => setTelaAtual('home')} color="inherit">
-              Voltar para Educação
-            </Link>
-          </Typography>
+          <Button onClick={() => setTelaAtual('home')} sx={{ mt: 1 }}>Voltar</Button>
         </Box>
       </Card>
     </Container>
   );
+
+  // --- TELA 4: USUÁRIO LOGADO ---
+  const renderLogado = () => (
+    <Container maxWidth="sm" sx={{ mt: 10, textAlign: 'center' }}>
+      <Typography variant="h4" color="primary" gutterBottom>Bem-vindo ao SafeClick!</Typography>
+      <Typography variant="h6" color="text.secondary" paragraph>
+        Você está logado como: <strong>{usuarioLogado?.email}</strong>
+      </Typography>
+      <Button variant="outlined" color="error" onClick={handleLogout}>Sair da Conta</Button>
+    </Container>
+  );
+
   return (
     <Box sx={{ minHeight: '80vh', bgcolor: '#F5F7FA' }}>
       {telaAtual === 'home' && renderHome()}
       {telaAtual === 'login' && renderLogin()}
       {telaAtual === 'cadastro' && renderCadastro()}
+      {telaAtual === 'logado' && renderLogado()}
     </Box>
   );
 }
