@@ -10,18 +10,16 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 
 export default function Educacao() {
   const [telaAtual, setTelaAtual] = useState('home');
-  
-  // Estados para capturar os dados do formulário
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   
-  // Estado para saber se alguém está logado
   const [usuarioLogado, setUsuarioLogado] = useState(null);
 
   // --- LÓGICA DE CADASTRO ---
   const handleCadastro = async (e) => {
-    e.preventDefault(); // Evita que a página recarregue
+    e.preventDefault();
     setErro('');
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
@@ -54,9 +52,8 @@ export default function Educacao() {
     setSenha('');
   };
 
-  // --- TELA 1: HOME DA EDUCAÇÃO (Permanece igual ao seu) ---
+  // --- TELA 1: HOME DA EDUCAÇÃO ---
   const renderHome = () => (
-    // ... (Cole aqui a sua tela renderHome exatamente como era antes)
     <div>
       <div className="hero-section">
         <Container maxWidth="md">
