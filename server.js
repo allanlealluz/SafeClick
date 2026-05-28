@@ -238,7 +238,7 @@ app.post('/api/analisar-email', async (req, res) => {
 });
 
 // Forçando a porta 5001 para não dar conflito com o React
-const PORTA = process.env.PORT || 5001;
+const PORTA = process.env.SERVER_PORT|| 5001;
 app.listen(PORTA, () => {
     console.log(`🛡️ Servidor de segurança rodando fixo na porta ${PORTA}`);
 });

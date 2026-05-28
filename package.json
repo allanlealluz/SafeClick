@@ -23,11 +23,12 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject",
+  "dev": "concurrently \"node server.js\" \"react-scripts start\""
   },
   "eslintConfig": {
     "extends": [
@@ -59,5 +60,8 @@
   "bugs": {
     "url": "https://github.com/allanlealluz/SafeClick/issues"
   },
-  "homepage": "."
+  "homepage": ".",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
