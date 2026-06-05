@@ -68,7 +68,8 @@ export default function Painel() {
     }
 
     try {
-      const resposta = await fetch('http://localhost:5001/api/analisar-link', {
+      // Ajuste: Caminho relativo (sem localhost)
+      const resposta = await fetch('/api/analisar-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urlParaAnalisar: urlBase })
@@ -95,10 +96,9 @@ export default function Painel() {
     formData.append("arquivoParaAnalisar", arquivo);
 
     try {
-      const resposta = await fetch('http://localhost:5001/api/analisar-arquivo', {
+      // Ajuste: Caminho relativo (sem localhost)
+      const resposta = await fetch('/api/analisar-arquivo', {
         method: 'POST',
-        // ATENÇÃO: Nunca defina 'Content-Type' manualmente ao usar FormData.
-        // O navegador faz isso automaticamente e define o "boundary" correto.
         body: formData
       });
       processarResposta(resposta);
@@ -122,7 +122,8 @@ export default function Painel() {
     }
 
     try {
-      const resposta = await fetch('http://localhost:5001/api/analisar-email', {
+      // Ajuste: Caminho relativo (sem localhost)
+      const resposta = await fetch('/api/analisar-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailParaAnalisar: email.trim() })
@@ -155,7 +156,7 @@ export default function Painel() {
   const tratarErroConexao = (error) => {
     console.error("Erro na API:", error);
     setAnaliseStatus("warning");
-    setMensagem("Não conseguimos conectar ao nosso servidor de segurança. Verifique se o backend está rodando na porta 5000.");
+    setMensagem("Não conseguimos conectar ao nosso servidor de segurança. Verifique sua conexão ou se o sistema está online.");
   };
 
   // ==========================================
