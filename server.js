@@ -368,8 +368,12 @@ app.post('/api/analisar-email', async (req, res) => {
     }
 });
 
-// Inicialização do servidor
 const PORTA = process.env.SERVER_PORT || 5001;
-app.listen(PORTA, () => {
-    console.log(`🛡️ Servidor de segurança rodando fixo na porta ${PORTA}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORTA, () => {
+        console.log(`🛡️ Servidor de segurança rodando fixo na porta ${PORTA}`);
+    });
+}
+
+// ESSENCIAL PARA A VERCEL:
+module.exports = app;
