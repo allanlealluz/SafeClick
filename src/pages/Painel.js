@@ -37,13 +37,15 @@ export default function Painel() {
   
   // Estados de resultado
   const [analiseStatus, setAnaliseStatus] = useState(null); 
-  const [mensagem, setMensagem] = useState(""); 
+  const [mensagem, setMensagem] = useState("");
+  const [detalhes, setDetalhes] = useState([]);
 
   // Quando o usuário troca de aba, limpamos os resultados antigos
   const handleTabChange = (event, newValue) => {
     setTabAtual(newValue);
     setAnaliseStatus(null);
     setMensagem("");
+    setDetalhes([]); // CORREÇÃO: Limpa os detalhes ao trocar de aba
   };
 
   // ==========================================
@@ -68,7 +70,6 @@ export default function Painel() {
     }
 
     try {
-      // Ajuste: Caminho relativo (sem localhost)
       const resposta = await fetch('/api/analisar-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,20 +92,35 @@ export default function Painel() {
     }
     setAnaliseStatus("loading");
 
-    // Para envio de arquivos, usamos FormData em vez de JSON
-    const formData = new FormData();
-    formData.append("arquivoParaAnalisar", arquivo);
+    const reader = new FileReader();
 
-    try {
-      // Ajuste: Caminho relativo (sem localhost)
-      const resposta = await fetch('/api/analisar-arquivo', {
-        method: 'POST',
-        body: formData
-      });
-      processarResposta(resposta);
-    } catch (error) {
-      tratarErroConexao(error);
-    }
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(",")[1];
+
+        const resposta = await fetch("/api/analisar-arquivo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            nomeArquivo: arquivo.name,
+            arquivoBase64: base64
+          })
+        });
+
+        processarResposta(resposta);
+      } catch (error) {
+        tratarErroConexao(error);
+      }
+    };
+
+    reader.onerror = () => {
+      setAnaliseStatus("warning");
+      setMensagem("Não foi possível ler o arquivo.");
+    };
+
+    reader.readAsDataURL(arquivo);
   };
 
   // ==========================================
@@ -122,7 +138,6 @@ export default function Painel() {
     }
 
     try {
-      // Ajuste: Caminho relativo (sem localhost)
       const resposta = await fetch('/api/analisar-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,6 +162,7 @@ export default function Painel() {
       }
       setAnaliseStatus(dados.statusFinal);
       setMensagem(dados.mensagem);
+      setDetalhes(dados.detalhes || []);
     } catch (e) {
       setAnaliseStatus("warning");
       setMensagem("Erro ao processar a resposta do servidor.");
@@ -256,24 +272,60 @@ export default function Painel() {
 
       {/* RESULTADO DA ANÁLISE */}
       {analiseStatus && analiseStatus !== "loading" && (
-        <div style={{
-          padding: '24px 0', 
-          marginTop: '20px',
-          backgroundColor: analiseStatus === 'safe' ? '#e8f5e9' : analiseStatus === 'warning' ? '#fff3e0' : '#ffebee',
-          color: analiseStatus === 'safe' ? '#2e7d32' : analiseStatus === 'warning' ? '#ef6c00' : '#c62828',
-          borderTop: `4px solid ${analiseStatus === 'safe' ? '#4caf50' : analiseStatus === 'warning' ? '#ff9800' : '#f44336'}`,
-          borderBottom: `1px solid ${analiseStatus === 'safe' ? '#c8e6c9' : analiseStatus === 'warning' ? '#ffe0b2' : '#ffcdd2'}`
-        }}>
-          <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 800 }}>
-              {analiseStatus === 'safe' ? "✓ Pareceu Seguro!" : 
-               analiseStatus === 'warning' ? "⚠️ Atenção Necessária" : "🛑 Cuidado! Risco Detectado"}
-            </Typography>
-            <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-              {mensagem}
-            </Typography>
-          </Container>
-        </div>
+        <>
+          <div style={{
+            padding: '24px 0', 
+            marginTop: '20px',
+            backgroundColor: analiseStatus === 'safe' ? '#e8f5e9' : analiseStatus === 'warning' ? '#fff3e0' : '#ffebee',
+            color: analiseStatus === 'safe' ? '#2e7d32' : analiseStatus === 'warning' ? '#ef6c00' : '#c62828',
+            borderTop: `4px solid ${analiseStatus === 'safe' ? '#4caf50' : analiseStatus === 'warning' ? '#ff9800' : '#f44336'}`,
+            borderBottom: `1px solid ${analiseStatus === 'safe' ? '#c8e6c9' : analiseStatus === 'warning' ? '#ffe0b2' : '#ffcdd2'}`
+          }}>
+            <Container maxWidth="md" sx={{ textAlign: 'center' }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 800 }}>
+                {analiseStatus === 'safe' ? "✓ Pareceu Seguro!" : 
+                 analiseStatus === 'warning' ? "⚠️ Atenção Necessária" : "🛑 Cuidado! Risco Detectado"}
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                {mensagem}
+              </Typography>
+            </Container>
+          </div>
+
+          {/* CORREÇÃO: Bloco de detalhes movido para dentro do escopo correto do componente */}
+          {detalhes.length > 0 && (
+            <Container maxWidth="md" sx={{ mt: 3 }}>
+              <Box sx={{ textAlign: "left" }}>
+                {detalhes.map((item, index) => (
+                  <Card
+                    key={index}
+                    sx={{
+                      mb: 2,
+                      borderLeft: `4px solid ${
+                        item.status === "success" || item.status === "safe"
+                          ? "#4caf50"
+                          : item.status === "warning"
+                          ? "#ff9800"
+                          : item.status === "danger"
+                          ? "#f44336"
+                          : "#2196f3"
+                      }`
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight={700}>
+                        {item.criterio}
+                      </Typography>
+                      <Typography variant="body2">
+                        {item.mensagem}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Container>
+          )}
+        </>
       )}
 
       {/* CARDS INFORMATIVOS */}
