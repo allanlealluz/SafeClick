@@ -1,8 +1,18 @@
 import "./Educacao.css";
 import React, { useState, useEffect } from "react";
-import { 
-  Typography, Button, Container, Card, CardContent, 
-  Grid, Box, TextField, Link, Alert
+import {
+  Typography,
+  Button,
+  Container,
+  Card,
+  CardContent,
+  Grid,
+  Box,
+  TextField,
+  Link,
+  Alert,
+  LinearProgress,
+  Chip
 } from "@mui/material";
 
 import { auth } from "../firebaseConfig";
@@ -21,6 +31,166 @@ export default function Educacao() {
   const [erro, setErro] = useState('');
   
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+
+  const [moduloSelecionado, setModuloSelecionado] = useState(null);
+
+  const progresso = 35;
+
+  const modulos = [
+  {
+    id: 1,
+    icone: "🛡️",
+    titulo: "Introdução à Segurança",
+    descricao: "Conceitos básicos de segurança digital.",
+    conteudo: `
+A segurança digital é o conjunto de práticas, ferramentas e comportamentos utilizados para proteger informações, dispositivos e contas contra acessos não autorizados, golpes e ataques virtuais. Atualmente, grande parte das nossas atividades acontece pela internet, como compras, pagamentos, estudos, trabalho e comunicação. Por isso, conhecer os riscos existentes é fundamental para utilizar a tecnologia com mais segurança.
+
+Criminosos virtuais utilizam diversas técnicas para enganar usuários e obter informações pessoais, como senhas, dados bancários e documentos. Muitas vezes, esses ataques não exploram falhas em sistemas, mas sim o comportamento humano. Isso significa que qualquer pessoa pode se tornar alvo de um golpe, independentemente do nível de conhecimento tecnológico.
+
+Alguns cuidados básicos podem reduzir significativamente os riscos. É importante manter computadores e celulares sempre atualizados, utilizar senhas fortes, evitar clicar em links desconhecidos e desconfiar de mensagens que criem senso de urgência. Além disso, realizar backups periódicos ajuda a evitar a perda de dados importantes.
+
+A educação digital é uma das formas mais eficazes de prevenção. Quanto mais uma pessoa conhece os golpes e as ameaças existentes, maiores são as chances de identificar situações suspeitas antes que causem prejuízos.
+
+Boas práticas:
+• Mantenha seus dispositivos atualizados.
+• Utilize antivírus confiáveis.
+• Faça backups regularmente.
+• Nunca compartilhe senhas.
+• Verifique sempre a autenticidade de sites e aplicativos.
+`
+  },
+  {
+    id: 2,
+    icone: "🎣",
+    titulo: "Phishing",
+    descricao: "Aprenda a identificar golpes online.",
+    conteudo: `
+Phishing é uma das formas mais comuns de golpe na internet. Nesse tipo de ataque, criminosos tentam se passar por empresas, bancos ou serviços conhecidos para convencer a vítima a fornecer informações pessoais, como senhas, números de cartão e dados bancários.
+
+Normalmente o golpe chega por e-mail, SMS, WhatsApp ou redes sociais. As mensagens costumam utilizar linguagem alarmante, afirmando que existe um problema urgente na conta da vítima. O objetivo é fazer com que a pessoa tome uma decisão rápida sem analisar a situação cuidadosamente.
+
+Os golpistas geralmente criam páginas falsas muito parecidas com as originais. Em muitos casos, apenas pequenos detalhes diferenciam o site legítimo do fraudulento. Por isso, é importante observar atentamente o endereço da página antes de inserir qualquer informação.
+
+Exemplo de phishing:
+
+"Seu banco identificou uma movimentação suspeita. Clique aqui para validar sua conta."
+
+Ao clicar, a vítima é direcionada para um site falso que coleta seus dados.
+
+Sinais de alerta:
+• Mensagens urgentes.
+• Links desconhecidos.
+• Erros de ortografia.
+• Solicitação de senhas.
+• Promoções exageradas.
+
+Sempre confirme informações utilizando canais oficiais da empresa.
+`
+  },
+  {
+    id: 3,
+    icone: "🔒",
+    titulo: "Senhas Seguras",
+    descricao: "proteger suas contas contra invasões.",
+    conteudo: `
+As senhas são a principal barreira de proteção das contas digitais. Quando uma senha é fraca ou previsível, criminosos podem obter acesso às informações pessoais com relativa facilidade.
+
+Muitas pessoas ainda utilizam combinações simples como "123456", "senha123" ou datas de nascimento. Essas senhas podem ser descobertas em poucos segundos por ferramentas automatizadas utilizadas por criminosos.
+
+Uma senha forte deve possuir uma combinação de letras maiúsculas, letras minúsculas, números e caracteres especiais. Além disso, recomenda-se utilizar pelo menos 12 caracteres para aumentar significativamente o nível de segurança.
+
+Outro erro comum é reutilizar a mesma senha em vários serviços. Caso uma plataforma sofra vazamento de dados, todas as demais contas que utilizam a mesma senha também podem ficar comprometidas.
+
+Exemplo de senha forte:
+
+J0rg3!SafeClick#2026
+
+Boas práticas:
+• Use senhas únicas para cada serviço.
+• Ative autenticação em dois fatores.
+• Não compartilhe senhas.
+• Utilize gerenciadores de senhas.
+• Troque senhas comprometidas imediatamente.
+`
+  },
+  {
+    id: 4,
+    icone: "🔗",
+    titulo: "Links Maliciosos",
+    descricao: "Aprenda a reconhecer URLs perigosas.",
+    conteudo: `
+Links maliciosos são endereços criados para direcionar usuários a páginas falsas ou infectadas com programas maliciosos. Muitas vezes eles são distribuídos por mensagens, e-mails, anúncios ou redes sociais.
+
+Ao clicar em um link malicioso, a vítima pode ter seus dados roubados, instalar vírus sem perceber ou ser redirecionada para páginas fraudulentas que simulam sites legítimos.
+
+Uma técnica muito utilizada pelos criminosos consiste em registrar domínios parecidos com os originais. A diferença pode ser apenas uma letra ou símbolo, dificultando a identificação do golpe.
+
+Exemplos:
+
+Seguro:
+www.google.com
+
+Suspeito:
+www.google-seguranca.xyz
+
+Antes de clicar em qualquer link, verifique:
+• O domínio do site.
+• A presença do HTTPS.
+• Erros de escrita.
+• Solicitações incomuns de dados.
+
+Quando possível, digite o endereço manualmente no navegador em vez de acessar links recebidos por mensagens.
+`
+  },
+  {
+    id: 5,
+    icone: "🧠",
+    titulo: "Engenharia Social",
+    descricao: "Como criminosos manipulam pessoas.",
+    conteudo: `
+Engenharia social é uma técnica utilizada para manipular pessoas e convencê-las a fornecer informações confidenciais ou realizar ações que beneficiem criminosos.
+
+Diferentemente dos ataques técnicos, a engenharia social explora emoções humanas como medo, confiança, curiosidade e urgência. O objetivo é fazer a vítima agir sem analisar a situação adequadamente.
+
+Um exemplo comum ocorre quando alguém se passa por funcionário de banco e informa que a conta da vítima foi comprometida. Em seguida, solicita códigos de autenticação ou dados pessoais para supostamente resolver o problema.
+
+Os criminosos costumam estudar o comportamento da vítima antes do contato. Informações obtidas em redes sociais podem ser utilizadas para tornar o golpe mais convincente.
+
+Sinais de engenharia social:
+• Pressão para agir rapidamente.
+• Solicitação de informações sigilosas.
+• Promessas exageradas.
+• Histórias emocionais.
+• Autoridade falsa.
+
+Sempre confirme informações utilizando canais oficiais antes de tomar qualquer decisão.
+`
+  },
+  {
+    id: 6,
+    icone: "💳",
+    titulo: "Golpes Bancários",
+    descricao: "golpes financeiros mais comuns.",
+    conteudo: `
+Os golpes bancários estão entre os crimes digitais que mais causam prejuízos financeiros. Os criminosos utilizam diversas estratégias para convencer as vítimas a realizar transferências, informar dados bancários ou instalar aplicativos maliciosos.
+
+Um dos golpes mais comuns é o da falsa central de atendimento. Nesse caso, o criminoso entra em contato alegando ser funcionário do banco e informa que existe uma movimentação suspeita na conta. Durante a conversa, tenta obter senhas, códigos de autenticação ou convencer a vítima a realizar transferências.
+
+Outro golpe bastante conhecido envolve o PIX. Os golpistas enviam comprovantes falsos ou mensagens afirmando que ocorreu um erro na transferência, induzindo a vítima a realizar novos pagamentos.
+
+Também existem golpes relacionados a empréstimos falsos, clonagem de cartões e aplicativos bancários adulterados.
+
+Para se proteger:
+• Nunca informe senhas por telefone.
+• Confirme informações diretamente no aplicativo oficial.
+• Desconfie de pedidos urgentes.
+• Verifique sempre os comprovantes recebidos.
+• Ative notificações de movimentações bancárias.
+
+Em caso de suspeita, entre em contato diretamente com seu banco utilizando os canais oficiais disponíveis.
+`
+  }
+];
 
   // 🔥 Mantém usuário logado mesmo após refresh
   useEffect(() => {
@@ -104,165 +274,176 @@ export default function Educacao() {
 
     // 🔓 LOGADO → CONTEÚDO
     return (
-            <div>
-              <div className="hero-section">
-  <Container maxWidth="md">
-    <Typography variant="h3">
-      Aprenda a Navegar com Segurança
-    </Typography>
+  <>
+    <div className="hero-section">
+      <Container maxWidth="lg">
 
-    <Typography variant="h6">
-      Descubra como identificar golpes, evitar links perigosos e proteger seus dados na internet de forma simples e prática.
-    </Typography>
+        <Typography variant="h3">
+          Centro de Aprendizado SafeClick
+        </Typography>
 
-    <Button 
-      className="btn-logout"
-      onClick={handleLogout}
-    >
-      Sair
-    </Button>
-  </Container>
-</div>
+        <Typography variant="h6">
+          Aprenda a identificar golpes digitais e proteger seus dados.
+        </Typography>
 
-<Container className="content-section">
-  <Typography variant="h4" className="section-title">
-    Conteúdo Educativo
-  </Typography>
+        <Box className="progress-container">
 
-  <Grid container spacing={3} className="cards-grid">
+          <Typography sx={{ mb: 1 }}>
+            Progresso do Curso
+          </Typography>
 
-    {/* PHISHING */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">🎣</div>
-          <Typography className="card-title">
-            Phishing
-          </Typography>
-          <Typography className="card-text">
-            
-            Phishing é um tipo de golpe online em que criminosos tentam enganar você se passando 
-            por empresas ou pessoas confiáveis, como bancos, lojas ou até conhecidos. 
-            Eles geralmente enviam mensagens por e-mail, SMS ou aplicativos como WhatsApp, 
-            pedindo que você clique em um link ou informe seus dados pessoais, como senha, 
-            CPF ou informações bancárias. Essas mensagens costumam criar um senso de urgência, 
-            dizendo que sua conta foi bloqueada ou que você precisa agir rapidamente. Para se proteger, 
-            nunca clique em links desconhecidos, verifique sempre o remetente da mensagem e evite fornecer 
-            informações pessoais fora de sites oficiais.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+          <LinearProgress
+            variant="determinate"
+            value={progresso}
+            className="progress-bar"
+          />
 
-    {/* SENHAS */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">🔒</div>
-          <Typography className="card-title">
-            Senhas Seguras
+          <Typography sx={{ mt: 1 }}>
+            {progresso}% concluído
           </Typography>
-          <Typography className="card-text">
-            Uma senha segura é essencial para proteger suas contas na internet contra acessos não autorizados. 
-            Senhas fracas ou fáceis de adivinhar, como datas de nascimento ou sequências simples (123456), 
-            podem ser descobertas rapidamente por criminosos. Por isso, é importante criar senhas mais fortes, 
-            combinando letras maiúsculas e minúsculas, números e símbolos. Além disso, evite usar a mesma senha em vários sites, 
-            pois se uma conta for comprometida, todas as outras também ficam em risco. Sempre que possível, 
-            utilize autenticação em dois fatores (2FA) e prefira usar um gerenciador de senhas para armazená-las com segurança.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
 
-    {/* LINKS */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">🔗</div>
-          <Typography className="card-title">
-            Links Maliciosos
-          </Typography>
-          <Typography className="card-text">
-            Links maliciosos são endereços falsos criados para levar o usuário a sites perigosos, 
-            que podem roubar informações pessoais, instalar vírus ou aplicar golpes. Muitas vezes, 
-            esses links chegam por e-mail, redes sociais ou aplicativos de mensagem, disfarçados como promoções, 
-            avisos importantes ou mensagens de pessoas conhecidas. Antes de clicar em qualquer link, 
-            é importante verificar se o endereço é confiável, observando erros de escrita, domínios estranhos 
-            ou muito diferentes do original. Evite também links encurtados ou desconhecidos, pois eles escondem o destino real. 
-            Sempre que possível, acesse sites digitando o endereço diretamente no navegador, garantindo mais segurança.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+        </Box>
 
-    {/* NOVO CARD 1 */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">💬</div>
-          <Typography className="card-title">
-            Golpes em Mensagens
-          </Typography>
-          <Typography className="card-text">
-            Golpes em mensagens são muito comuns em aplicativos como WhatsApp e SMS, 
-            onde criminosos enviam conteúdos falsos para enganar as pessoas. 
-            Essas mensagens podem prometer prêmios, promoções imperdíveis ou até simular pedidos de ajuda de 
-            amigos e familiares. Muitas vezes, o objetivo é fazer com que você clique em um link ou compartilhe informações pessoais. 
-            Para se proteger, é importante sempre desconfiar de mensagens inesperadas, principalmente aquelas que pedem urgência ou envolvem dinheiro. 
-            Antes de clicar em qualquer link ou responder, verifique a origem da mensagem e, se possível, confirme a informação diretamente com a pessoa ou empresa. 
-            Evitar agir por impulso é uma das melhores formas de se proteger contra esse tipo de golpe.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+        <Button
+          className="btn-logout"
+          onClick={handleLogout}
+        >
+          Sair
+        </Button>
 
-    {/* NOVO CARD 2 */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">🧠</div>
-          <Typography className="card-title">
-            Engenharia Social
-          </Typography>
-          <Typography className="card-text">
-            Engenharia social é uma técnica usada por criminosos para manipular pessoas e 
-            obter informações confidenciais, como senhas, códigos ou dados pessoais. 
-            Em vez de atacar sistemas diretamente, eles exploram a confiança e o comportamento humano, 
-            fingindo ser alguém confiável, como um funcionário de banco, suporte técnico ou até um conhecido. 
-            Esses golpes geralmente envolvem senso de urgência, pressão ou pedidos incomuns, 
-            como solicitar códigos de verificação ou transferências de dinheiro. Para se proteger, nunca compartilhe 
-            informações sensíveis sem confirmar a identidade da pessoa e desconfie de qualquer situação que pareça apressada ou fora do normal. 
-            Sempre que possível, verifique a informação por canais oficiais antes de tomar qualquer ação.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+      </Container>
+    </div>
 
-    {/* NOVO CARD 3 */}
-    <Grid item xs={12} md={4}>
-      <Card className="card-educacao">
-        <CardContent>
-          <div className="card-icon">✅</div>
-          <Typography className="card-title">
-            Boas Práticas
-          </Typography>
-          <Typography className="card-text">
-            Adotar boas práticas de segurança é essencial para se proteger no 
-            dia a dia na internet. Manter aplicativos e sistemas sempre atualizados ajuda a 
-            corrigir falhas de segurança que podem ser exploradas por criminosos. Além disso, 
-            é importante evitar o uso de redes Wi-Fi públicas para acessar contas pessoais ou realizar operações sensíveis, 
-            pois essas redes podem não ser seguras. Outra recomendação fundamental é nunca compartilhar dados pessoais 
-            ou bancários em sites desconhecidos ou não confiáveis. Sempre verifique se o site possui conexão segura (https) 
-            e se realmente pertence à empresa que diz representar. Pequenos cuidados como esses fazem grande diferença e ajudam a evitar golpes e problemas online.
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
+    <Container maxWidth="lg" className="content-section">
 
-  </Grid>
-</Container>
-      </div>
-    );
+      <Typography
+        variant="h4"
+        className="section-title"
+      >
+        Módulos de Aprendizado
+      </Typography>
+
+      <Grid container spacing={3}>
+
+        {modulos.map((modulo, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+
+            <Card
+            className="card-modulo"
+            onClick={() => setModuloSelecionado(modulo)}
+          >
+
+              <CardContent>
+
+                <div className="modulo-icon">
+                  {modulo.icone}
+                </div>
+
+                <Typography className="modulo-title">
+                  {modulo.titulo}
+                </Typography>
+
+                <Typography className="modulo-text">
+                  {modulo.descricao}
+                </Typography>
+
+                <Chip
+                  label="Disponível"
+                  color="success"
+                  sx={{ mt: 2 }}
+                />
+
+              </CardContent>
+
+            </Card>
+
+          </Grid>
+        ))}
+
+      </Grid>
+
+      <Box className="estatisticas-box">
+
+        {moduloSelecionado && (
+  <Card className="conteudo-modulo-card">
+
+    <CardContent>
+
+      <Typography
+        variant="h4"
+        className="conteudo-titulo"
+      >
+        {moduloSelecionado.icone} {moduloSelecionado.titulo}
+      </Typography>
+
+      <Typography
+        className="conteudo-texto"
+      >
+        {moduloSelecionado.conteudo}
+      </Typography>
+
+      <Button
+        variant="contained"
+        sx={{ mt: 3 }}
+        onClick={() => setModuloSelecionado(null)}
+      >
+        Fechar Aula
+      </Button>
+
+    </CardContent>
+
+  </Card>
+)}
+
+        <Typography
+          variant="h4"
+          className="section-title"
+        >
+          Fatos Importantes
+        </Typography>
+
+        <Grid container spacing={3}>
+
+          <Grid item xs={12} md={4}>
+            <Card className="stats-card">
+              <CardContent>
+                <Typography variant="h3">90%</Typography>
+                <Typography>
+                  dos ataques começam através de phishing.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card className="stats-card">
+              <CardContent>
+                <Typography variant="h3">80%</Typography>
+                <Typography>
+                  das invasões usam senhas vazadas ou fracas.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card className="stats-card">
+              <CardContent>
+                <Typography variant="h3">35%</Typography>
+                <Typography>
+                  aumento nos golpes via WhatsApp.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+        </Grid>
+
+      </Box>
+
+    </Container>
+  </>
+);
   };
 
   // --- LOGIN ---
