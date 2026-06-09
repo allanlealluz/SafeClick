@@ -192,7 +192,6 @@ Em caso de suspeita, entre em contato diretamente com seu banco utilizando os ca
   }
 ];
 
-  // 🔥 Mantém usuário logado mesmo após refresh
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUsuarioLogado(user);
